@@ -29,10 +29,8 @@ checkLibs <- function(name) {
   if (length(notInstalled) > 0)
     install.packages(notInstalled)
 }
-checkLibs(c("dplyr", "tidyr"))
-library(dplyr)
-library(tidyr)
-
+checkLibs(c("plyr"))#, "dplyr", "tidyr"))
+library(plyr)
 
 
 #########################################################################
@@ -77,9 +75,9 @@ train_data_subject <- scan("train/subject_train.txt")
 # combine X an Y variables with the activity labels as activity attribute
 # in the new dataset, activity is a factor variable
 # also as it is needed in task 5 the subject is also added to this dataset
-train_data <- cbind(train_data_x,
+train_data <- cbind("subject" = train_data_subject,
                     "activity" = train_data_y,
-                    "subject" = train_data_subject)
+                    train_data_x)
 
 
 
@@ -101,15 +99,24 @@ test_data_subject <- scan("test/subject_test.txt")
 
 # I did the same for the test set, adding the activity column to it as a factor
 # also as it is needed in task 5 the subject is also added to this dataset
-test_data <- cbind(test_data_x,
+test_data <- cbind("subject" = test_data_subject,
                    "activity" = test_data_y,
-                   "subject" = test_data_subject)
+                   test_data_x)
 
 
 ##### Now joining the two datasets together in a new data.frame
 # this part is done because of task detail:
 #   1.Merges the training and the test sets to create one data set.
 all_data <- rbind(train_data, test_data)
+
+write.table(all_data, "allData.txt", row.names = FALSE)
+
+# exporting the CodeBook.md file the column index and name
+write.table(cbind(Index = 1:length(all_data), VariableName = colnames(all_data)),
+            "CodeBook.md", row.names = FALSE)
+
+# changing subject to factor as we need to do a group by on it later
+all_data$subject <- as.factor(all_data$subject)
 # Note: as it was not mentioned in the task I didn't add another extra column,
 # which will show each row is for training set or test set, but it could have
 # been done if it was important for us.
@@ -132,4 +139,28 @@ rm(list = ls()[ls() != "all_data"])
 #######################################################################
 
 
+tidyData <- ddply(all_data, .(subject, activity), function(x) {
+    colMeans(subset(x, select = -c(subject,activity)))
+  })
 
+write.table(tidyData, "tidyData.txt", row.names = FALSE)
+# now write the table in the file for uploading
+
+# in my opinion having each variable in the column is a tidy data.
+# but there is another way to interpret this situation
+# we can have the variable name in a column and the value of that variable
+# in another column (this is another approach) but not sure which one is the
+# result that I should give, but I'll go with my gut and let the above code
+# be the tidyData as each variable is on a column although.
+
+#library(dplyr)
+#library(tidyr)
+#td <- tbl_df(tidyData)
+#tidyData2 <- td %>%
+#  gather(variableName, MeanOfVariable, -c(subject, activity)) %>%
+#  arrange(subject, activity)
+
+#write.table(tidyData2, "tidyData2.txt")
+
+#tidyData2[tidyData2$variableName == "tBodyAcc-mean()-X" &
+#            tidyData2$activity == "LAYING",]
