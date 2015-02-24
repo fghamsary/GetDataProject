@@ -109,6 +109,9 @@ test_data <- cbind("subject" = test_data_subject,
 #   1.Merges the training and the test sets to create one data set.
 all_data <- rbind(train_data, test_data)
 
+# Changing the names of the attributs would be a good idea that I forgot!
+names(all_data) <- gsub("\\-", ".", gsub("\\(\\)", "", names(all_data)))
+
 write.table(all_data, "allData.txt", row.names = FALSE)
 
 # exporting the CodeBook.md file the column index and name
@@ -128,7 +131,6 @@ all_data$subject <- as.factor(all_data$subject)
 # data and training set together, I'm going to remove all unnecessary variables
 # for memory saving
 rm(list = ls()[ls() != "all_data"])
-
 
 
 #######################################################################
