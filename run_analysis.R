@@ -92,7 +92,7 @@ colnames(test_data_x) <- feature_names$V2[feature_needed_indexes]
 # read all y (target variable) type of activity as well.
 test_data_y <- read.table("test/y_test.txt")
 # the same way as above changing test_data_y to descriptions with factor
-test_data_y <- activity_labels[test_data_y[1,], 2]
+test_data_y <- activity_labels[test_data_y$V1, 2]
 
 # read the sobject of test data as it is needed in point 5 of the task
 test_data_subject <- scan("test/subject_test.txt")
